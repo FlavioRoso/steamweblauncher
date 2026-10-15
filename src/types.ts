@@ -1,4 +1,4 @@
-export type WebApp = {
+export type WebLink = {
   id: string;
   title: string;
   url: string;
@@ -6,8 +6,8 @@ export type WebApp = {
   shortcut_app_id: number | null;
 };
 
-export function displayName(app: Pick<WebApp, "title" | "url">): string {
-  return app.title.trim() || app.url;
+export function displayName(link: Pick<WebLink, "title" | "url">): string {
+  return link.title.trim() || link.url;
 }
 
 const STARTS_WITH_SCHEME = /^[a-z][a-z0-9+.-]*:\/\//i;

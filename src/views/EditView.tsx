@@ -8,20 +8,20 @@ import { toaster } from "@decky/api";
 import { useState } from "react";
 import { t } from "../i18n";
 import { NoBrowserError } from "../launcher";
-import type { WebApp } from "../types";
-import { InvalidUrlError, saveWebApp } from "../webApps";
+import type { WebLink } from "../types";
+import { InvalidUrlError, saveWebLink } from "../webLinks";
 
 const ERROR_COLOR = "#e5534b";
 
 type Props = {
-  app?: WebApp;
-  onSaved: (app: WebApp) => void;
+  link?: WebLink;
+  onSaved: (link: WebLink) => void;
   onCancel: () => void;
 };
 
-export function EditView({ app, onSaved, onCancel }: Props) {
-  const [title, setTitle] = useState(app?.title ?? "");
-  const [url, setUrl] = useState(app?.url ?? "");
+export function EditView({ link, onSaved, onCancel }: Props) {
+  const [title, setTitle] = useState(link?.title ?? "");
+  const [url, setUrl] = useState(link?.url ?? "");
   const [urlInvalid, setUrlInvalid] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -29,7 +29,7 @@ export function EditView({ app, onSaved, onCancel }: Props) {
     setSaving(true);
     setUrlInvalid(false);
     try {
-      onSaved(await saveWebApp({ title, url }, app));
+      onSaved(await saveWebLink({ title, url }, link));
     } catch (error) {
       if (error instanceof InvalidUrlError) {
         setUrlInvalid(true);
@@ -44,7 +44,7 @@ export function EditView({ app, onSaved, onCancel }: Props) {
   };
 
   return (
-    <PanelSection title={t(app ? "edit.headingEdit" : "edit.headingNew")}>
+    <PanelSection title={t(link ? "edit.headingEdit" : "edit.headingNew")}>
       <PanelSectionRow>
         <TextField
           label={t("edit.titleLabel")}

@@ -91,11 +91,11 @@ export function SettingsView() {
         </PanelSectionRow>
         <PanelSectionRow>
           <ToggleField
-            label={t("settings.hideNewApps")}
-            description={t("settings.hideNewAppsDescription")}
-            checked={settings?.hide_new_apps ?? false}
+            label={t("settings.hideNewLinks")}
+            description={t("settings.hideNewLinksDescription")}
+            checked={settings?.hide_new_links ?? false}
             disabled={!settings}
-            onChange={onToggle("hide_new_apps")}
+            onChange={onToggle("hide_new_links")}
           />
         </PanelSectionRow>
         <PanelSectionRow>

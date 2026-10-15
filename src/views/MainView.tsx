@@ -7,19 +7,19 @@ import {
 } from "@decky/ui";
 import { toaster } from "@decky/api";
 import { FaPlus } from "react-icons/fa";
-import { WebAppRow } from "../components/WebAppRow";
+import { WebLinkRow } from "../components/WebLinkRow";
 import { t } from "../i18n";
-import { launchWebApp, NoBrowserError } from "../launcher";
-import { displayName, type WebApp } from "../types";
-import { deleteWebApp, setWebAppHidden } from "../webApps";
+import { launchWebLink, NoBrowserError } from "../launcher";
+import { displayName, type WebLink } from "../types";
+import { deleteWebLink, setWebLinkHidden } from "../webLinks";
 
 type Props = {
-  apps: WebApp[] | null;
+  links: WebLink[] | null;
   loadFailed: boolean;
   onAdd: () => void;
-  onEdit: (app: WebApp) => void;
-  onAppUpdated: (app: WebApp) => void;
-  onAppDeleted: (app: WebApp) => void;
+  onEdit: (link: WebLink) => void;
+  onLinkUpdated: (link: WebLink) => void;
+  onLinkDeleted: (link: WebLink) => void;
 };
 
 function Message({ text }: { text: string }) {
@@ -35,17 +35,17 @@ function toastError(body: string) {
 }
 
 export function MainView({
-  apps,
+  links,
   loadFailed,
   onAdd,
   onEdit,
-  onAppUpdated,
-  onAppDeleted,
+  onLinkUpdated,
+  onLinkDeleted,
 }: Props) {
-  const openWebApp = async (app: WebApp) => {
+  const openWebLink = async (link: WebLink) => {
     try {
-      const stored = await launchWebApp(app);
-      if (stored !== app) onAppUpdated(stored);
+      const stored = await launchWebLink(link);
+      if (stored !== link) onLinkUpdated(stored);
     } catch (error) {
       console.error("steamweblauncher: launch failed", error);
       const message =
@@ -54,27 +54,27 @@ export function MainView({
     }
   };
 
-  const toggleHidden = async (app: WebApp) => {
+  const toggleHidden = async (link: WebLink) => {
     try {
-      onAppUpdated(await setWebAppHidden(app, !app.hidden));
+      onLinkUpdated(await setWebLinkHidden(link, !link.hidden));
     } catch (error) {
       console.error("steamweblauncher: visibility change failed", error);
       toastError(t("main.updateFailed"));
     }
   };
 
-  const confirmDelete = (app: WebApp) => {
+  const confirmDelete = (link: WebLink) => {
     showModal(
       <ConfirmModal
         strTitle={t("main.deleteTitle")}
-        strDescription={t("main.deleteConfirm", { name: displayName(app) })}
+        strDescription={t("main.deleteConfirm", { name: displayName(link) })}
         strOKButtonText={t("main.delete")}
         strCancelButtonText={t("common.cancel")}
         bDestructiveWarning
         onOK={async () => {
           try {
-            await deleteWebApp(app);
-            onAppDeleted(app);
+            await deleteWebLink(link);
+            onLinkDeleted(link);
           } catch (error) {
             console.error("steamweblauncher: delete failed", error);
             toastError(t("main.deleteFailed"));
@@ -96,13 +96,13 @@ export function MainView({
       </PanelSection>
       <PanelSection title={t("main.listTitle")}>
         {loadFailed && <Message text={t("main.loadFailed")} />}
-        {!loadFailed && apps === null && <Message text={t("main.loading")} />}
-        {apps?.length === 0 && <Message text={t("main.empty")} />}
-        {apps?.map((app) => (
-          <PanelSectionRow key={app.id}>
-            <WebAppRow
-              app={app}
-              onOpen={openWebApp}
+        {!loadFailed && links === null && <Message text={t("main.loading")} />}
+        {links?.length === 0 && <Message text={t("main.empty")} />}
+        {links?.map((link) => (
+          <PanelSectionRow key={link.id}>
+            <WebLinkRow
+              link={link}
+              onOpen={openWebLink}
               onEdit={onEdit}
               onToggleHidden={toggleHidden}
               onDelete={confirmDelete}

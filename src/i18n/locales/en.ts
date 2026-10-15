@@ -33,8 +33,8 @@ const en = {
 
   "settings.showTab": "Web tab",
   "settings.showTabDescription": "Shows the Web shortcut in the side menu.",
-  "settings.hideNewApps": "Hide new links",
-  "settings.hideNewAppsDescription": "New links start hidden from the library. Use the eye button in the Web tab to change each one.",
+  "settings.hideNewLinks": "Hide new links",
+  "settings.hideNewLinksDescription": "New links start hidden from the library. Use the eye button in the Web tab to change each one.",
   "settings.desktopLayout": "Desktop controller layout",
   "settings.desktopLayoutDescription": "Links still on Steam's default layout get the one Steam uses in desktop mode (touchpad and stick as mouse). Layouts you choose are kept.",
   "settings.saveFailed": "Could not save the setting.",

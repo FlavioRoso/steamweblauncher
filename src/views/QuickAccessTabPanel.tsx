@@ -1,6 +1,6 @@
 import { Focusable, scrollClasses, staticClasses } from "@decky/ui";
 import { t } from "../i18n";
-import { WebAppsPanel } from "./WebAppsPanel";
+import { WebLinksPanel } from "./WebLinksPanel";
 
 export function QuickAccessTabPanel() {
   return (
@@ -15,7 +15,7 @@ export function QuickAccessTabPanel() {
         className={`${scrollClasses.ScrollPanel} ${scrollClasses.ScrollY}`}
         style={{ flex: 1 }}
       >
-        <WebAppsPanel />
+        <WebLinksPanel />
       </div>
     </Focusable>
   );

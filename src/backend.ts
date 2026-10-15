@@ -1,9 +1,9 @@
 import { callable } from "@decky/api";
-import type { WebApp } from "./types";
+import type { WebLink } from "./types";
 
 export type Settings = {
   show_quick_access_tab: boolean;
-  hide_new_apps: boolean;
+  hide_new_links: boolean;
   use_desktop_layout: boolean;
 };
 
@@ -25,11 +25,11 @@ export const logInfo = callable<[message: string], void>("log_info");
 
 export const getBrowsers = callable<[], BrowserStatus>("get_browsers");
 
-export const listApps = callable<[], WebApp[]>("list_apps");
+export const listLinks = callable<[], WebLink[]>("list_links");
 
-export const saveApp = callable<[app: WebApp], WebApp>("save_app");
+export const saveLink = callable<[link: WebLink], WebLink>("save_link");
 
-export const deleteApp = callable<[appId: string], WebApp | null>("delete_app");
+export const deleteLink = callable<[appId: string], WebLink | null>("delete_link");
 
 const fetchUserHome = callable<[], string>("get_user_home");
 

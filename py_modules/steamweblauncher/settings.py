@@ -4,7 +4,7 @@ SETTINGS_VERSION = 1
 
 DEFAULT_SETTINGS = {
     "show_quick_access_tab": True,
-    "hide_new_apps": True,
+    "hide_new_links": True,
     "use_desktop_layout": True,
 }
 

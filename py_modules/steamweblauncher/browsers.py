@@ -48,11 +48,11 @@ def _is_direct_child(parent: str, path: str) -> bool:
     return os.path.dirname(path) == parent
 
 
-def remove_profiles(home: str, app_id: str) -> list:
+def remove_profiles(home: str, link_id: str) -> list:
     removed = []
     for browser in SUPPORTED_BROWSERS:
         base = os.path.realpath(os.path.join(home, ".var", "app", browser["id"], PROFILES_FOLDER))
-        profile = os.path.realpath(os.path.join(base, app_id))
+        profile = os.path.realpath(os.path.join(base, link_id))
         if not _is_direct_child(base, profile) or not os.path.isdir(profile):
             continue
         shutil.rmtree(profile)

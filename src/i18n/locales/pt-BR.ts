@@ -35,8 +35,8 @@ const ptBR: Translations = {
 
   "settings.showTab": "Aba Web",
   "settings.showTabDescription": "Mostra o atalho Web no menu lateral.",
-  "settings.hideNewApps": "Ocultar novos links",
-  "settings.hideNewAppsDescription": "Novos links começam ocultos na biblioteca. Use o botão de olho na aba Web para mudar cada um.",
+  "settings.hideNewLinks": "Ocultar novos links",
+  "settings.hideNewLinksDescription": "Novos links começam ocultos na biblioteca. Use o botão de olho na aba Web para mudar cada um.",
   "settings.desktopLayout": "Disposição de controle do desktop",
   "settings.desktopLayoutDescription": "Links ainda com a disposição padrão do Steam recebem a que o Steam usa no modo desktop (touchpad e analógico como mouse). Disposições escolhidas por você são mantidas.",
   "settings.saveFailed": "Não foi possível salvar a configuração.",

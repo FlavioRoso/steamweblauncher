@@ -1,6 +1,6 @@
-import { getBrowsers, getSettings, getUserHome, saveApp } from "./backend";
+import { getBrowsers, getSettings, getUserHome, saveLink } from "./backend";
 import * as steam from "./steam";
-import { displayName, type WebApp } from "./types";
+import { displayName, type WebLink } from "./types";
 
 const FLATPAK_EXECUTABLE = "/usr/bin/flatpak";
 const PROFILES_FOLDER = "steamweblauncher";
@@ -14,12 +14,12 @@ function quoteForSteamArgumentParser(value: string): string {
   return `"${value.replace(/["\\$`]/g, "\\$&")}"`;
 }
 
-function profileSlug(webAppId: string): string {
-  return webAppId.replace(/[^a-zA-Z0-9_-]/g, "-");
+function profileSlug(webLinkId: string): string {
+  return webLinkId.replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
-function isolatedProfileDirectory(home: string, browserId: string, webAppId: string): string {
-  return `${home}/.var/app/${browserId}/${PROFILES_FOLDER}/${profileSlug(webAppId)}`;
+function isolatedProfileDirectory(home: string, browserId: string, webLinkId: string): string {
+  return `${home}/.var/app/${browserId}/${PROFILES_FOLDER}/${profileSlug(webLinkId)}`;
 }
 
 async function firstInstalledBrowserId(): Promise<string> {
@@ -38,13 +38,13 @@ function matchGameModeScaleFlags(): string[] {
   return [`--force-device-scale-factor=${roundToHundredths(scale)}`];
 }
 
-async function buildLaunchOptions(app: WebApp): Promise<string> {
+async function buildLaunchOptions(link: WebLink): Promise<string> {
   const [home, browserId] = await Promise.all([getUserHome(), firstInstalledBrowserId()]);
-  const profileDirectory = isolatedProfileDirectory(home, browserId, app.id);
+  const profileDirectory = isolatedProfileDirectory(home, browserId, link.id);
   return [
     "run",
     browserId,
-    `--app=${quoteForSteamArgumentParser(app.url)}`,
+    `--app=${quoteForSteamArgumentParser(link.url)}`,
     `--user-data-dir=${quoteForSteamArgumentParser(profileDirectory)}`,
     ...SKIP_NEW_PROFILE_PROMPTS_FLAGS,
     FILL_GAMESCOPE_WINDOW_FLAG,
@@ -52,33 +52,33 @@ async function buildLaunchOptions(app: WebApp): Promise<string> {
   ].join(" ");
 }
 
-async function existingOrNewShortcut(app: WebApp): Promise<number> {
-  const existing = app.shortcut_app_id;
+async function existingOrNewShortcut(link: WebLink): Promise<number> {
+  const existing = link.shortcut_app_id;
   if (existing !== null && steam.shortcutExists(existing)) return existing;
   return steam.addUnnamedShortcut(FLATPAK_EXECUTABLE);
 }
 
 async function updateShortcutWhereChanged(
   appId: number,
-  app: WebApp,
+  link: WebLink,
   launchOptions: string,
 ): Promise<void> {
-  const name = displayName(app);
+  const name = displayName(link);
   if (steam.getShortcutName(appId) !== name) {
     steam.setShortcutName(appId, name);
   }
   if ((await steam.getShortcutLaunchOptions(appId)) !== launchOptions) {
     steam.setShortcutLaunchOptions(appId, launchOptions);
   }
-  if (steam.isShortcutHidden(appId) !== app.hidden) {
-    steam.setShortcutHidden(appId, app.hidden);
+  if (steam.isShortcutHidden(appId) !== link.hidden) {
+    steam.setShortcutHidden(appId, link.hidden);
   }
 }
 
-export async function prepareShortcut(app: WebApp): Promise<number> {
-  const launchOptions = await buildLaunchOptions(app);
-  const appId = await existingOrNewShortcut(app);
-  await updateShortcutWhereChanged(appId, app, launchOptions);
+export async function prepareShortcut(link: WebLink): Promise<number> {
+  const launchOptions = await buildLaunchOptions(link);
+  const appId = await existingOrNewShortcut(link);
+  await updateShortcutWhereChanged(appId, link, launchOptions);
   return appId;
 }
 
@@ -101,14 +101,14 @@ async function applyDesktopLayoutIfEnabled(appId: number): Promise<void> {
   }
 }
 
-async function rememberShortcut(app: WebApp, appId: number): Promise<WebApp> {
-  if (appId === app.shortcut_app_id) return app;
-  return saveApp({ ...app, shortcut_app_id: appId });
+async function rememberShortcut(link: WebLink, appId: number): Promise<WebLink> {
+  if (appId === link.shortcut_app_id) return link;
+  return saveLink({ ...link, shortcut_app_id: appId });
 }
 
-export async function launchWebApp(app: WebApp): Promise<WebApp> {
-  const appId = await prepareShortcut(app);
-  const stored = await rememberShortcut(app, appId);
+export async function launchWebLink(link: WebLink): Promise<WebLink> {
+  const appId = await prepareShortcut(link);
+  const stored = await rememberShortcut(link, appId);
   await applyDesktopLayoutIfEnabled(appId);
   steam.closeQuickAccessMenu();
   steam.runShortcut(appId);

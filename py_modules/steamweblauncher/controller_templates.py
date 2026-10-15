@@ -24,11 +24,11 @@ TEMPLATE_TITLE = "SteamWeb Launcher – Desktop"
 LOCALIZATION = {
     "english": {
         "title": TEMPLATE_TITLE,
-        "description": "Steam's desktop mode layout (keyboard and mouse) for web apps.",
+        "description": "Steam's desktop mode layout (keyboard and mouse) for web links.",
     },
     "brazilian": {
         "title": TEMPLATE_TITLE,
-        "description": "Disposição do modo desktop do Steam (teclado e mouse) para web apps.",
+        "description": "Disposição do modo desktop do Steam (teclado e mouse) para links.",
     },
 }
 

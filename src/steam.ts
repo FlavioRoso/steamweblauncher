@@ -25,7 +25,7 @@ async function waitUntilAppStoreKnows(appId: number): Promise<void> {
   const start = Date.now();
   while (!window.appStore.GetAppOverviewByAppID(appId)) {
     if (Date.now() - start > APP_STORE_REGISTRATION_TIMEOUT_MS) {
-      throw new Error(`shortcut ${appId} did not appear in the app store`);
+      throw new Error(`shortcut ${appId} did not appear in the link store`);
     }
     await sleep(APP_STORE_POLL_INTERVAL_MS);
   }

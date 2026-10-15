@@ -2,7 +2,7 @@ import os
 
 import decky
 
-from steamweblauncher.apps import AppsStore
+from steamweblauncher.links import LinksStore
 from steamweblauncher.browsers import detect_browsers, remove_profiles
 from steamweblauncher import controller_templates
 from steamweblauncher.settings import SettingsStore
@@ -10,7 +10,7 @@ from steamweblauncher.settings import SettingsStore
 
 class Plugin:
     settings: SettingsStore
-    apps: AppsStore
+    links: LinksStore
 
     async def ping(self) -> dict:
         decky.logger.info("ping received from frontend")
@@ -37,21 +37,21 @@ class Plugin:
     async def get_browsers(self) -> dict:
         return await detect_browsers()
 
-    async def list_apps(self) -> list:
-        return [dict(app) for app in self.apps.apps]
+    async def list_links(self) -> list:
+        return [dict(link) for link in self.links.links]
 
-    async def save_app(self, app: dict) -> dict:
-        record = self.apps.save(app)
-        decky.logger.info(f"web app saved: {record['id']}")
+    async def save_link(self, link: dict) -> dict:
+        record = self.links.save(link)
+        decky.logger.info(f"link saved: {record['id']}")
         return record
 
-    async def delete_app(self, app_id: str):
-        removed = self.apps.delete(app_id)
+    async def delete_link(self, link_id: str):
+        removed = self.links.delete(link_id)
         if removed is None:
             return None
-        for path in remove_profiles(decky.DECKY_USER_HOME, app_id):
+        for path in remove_profiles(decky.DECKY_USER_HOME, link_id):
             decky.logger.info(f"removed browser profile: {path}")
-        decky.logger.info(f"web app deleted: {app_id}")
+        decky.logger.info(f"link deleted: {link_id}")
         return removed
 
     async def _main(self):
@@ -60,10 +60,10 @@ class Plugin:
             os.path.join(decky.DECKY_PLUGIN_SETTINGS_DIR, "settings.json")
         )
         self.settings.load()
-        self.apps = AppsStore(
-            os.path.join(decky.DECKY_PLUGIN_SETTINGS_DIR, "webapps.json")
+        self.links = LinksStore(
+            os.path.join(decky.DECKY_PLUGIN_SETTINGS_DIR, "links.json")
         )
-        self.apps.load()
+        self.links.load()
         try:
             for path in controller_templates.install(decky.DECKY_USER_HOME):
                 decky.logger.info(f"controller template installed: {path}")
