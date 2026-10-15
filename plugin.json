@@ -1,0 +1,11 @@
+{
+  "name": "steamweblauncher",
+  "author": "Flavio Roso",
+  "flags": [],
+  "api_version": 1,
+  "publish": {
+    "tags": ["steamweblauncher", "webapp", "browser", "discord", "launcher"],
+    "description": "Opens websites in Game Mode as non-Steam shortcuts, each in its own browser window and profile.",
+    "image": ""
+  }
+}
