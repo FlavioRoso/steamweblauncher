@@ -64,7 +64,7 @@ To check: on the plugin's page in Decky, the **Browser** section shows which one
 Needs git, Node.js 22+, pnpm and Python 3 (on Bazzite: `brew install node pnpm`). In Desktop Mode or over SSH:
 
 ```bash
-git clone <repository URL> steamweblauncher
+git clone https://github.com/FlavioRoso/steamweblauncher.git
 cd steamweblauncher
 pnpm install
 pnpm dev:deploy

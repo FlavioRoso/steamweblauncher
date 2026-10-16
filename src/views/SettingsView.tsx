@@ -17,7 +17,7 @@ import { t } from "../i18n";
 import { setQuickAccessTabVisible } from "../quickAccessTab";
 import { openExternalUrl } from "../steam";
 
-const DOCS_URL = "";
+const DOCS_URL = "https://github.com/FlavioRoso/steamweblauncher#readme";
 
 const OK_COLOR = "#59bf40";
 const ERROR_COLOR = "#e5534b";
