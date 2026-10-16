@@ -38,11 +38,14 @@ function BrowserStatusLine({ check }: { check: BrowserCheck }) {
   if (browser) {
     return (
       <div style={{ color: OK_COLOR }}>
-        {t("settings.browserFound", { name: browser.name })}
+        {t("settings.browserFound", {
+          name: browser.name,
+          kind: t(browser.kind === "flatpak" ? "settings.kindFlatpak" : "settings.kindNative"),
+        })}
       </div>
     );
   }
-  const names = check.status.supported.map((b) => b.name).join(", ");
+  const names = check.status.supported.join(", ");
   return (
     <div style={{ color: ERROR_COLOR }}>
       {t("settings.browserMissing", { browsers: names })}

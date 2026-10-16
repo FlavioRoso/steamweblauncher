@@ -20,9 +20,6 @@ class Plugin:
             "user_home": decky.DECKY_USER_HOME,
         }
 
-    async def get_user_home(self) -> str:
-        return decky.DECKY_USER_HOME
-
     async def log_info(self, message: str) -> None:
         decky.logger.info(f"frontend: {message}")
 
@@ -35,7 +32,7 @@ class Plugin:
         return dict(self.settings.values)
 
     async def get_browsers(self) -> dict:
-        return await detect_browsers()
+        return await detect_browsers(decky.DECKY_USER_HOME)
 
     async def list_links(self) -> list:
         return [dict(link) for link in self.links.links]

@@ -7,11 +7,18 @@ export type Settings = {
   use_desktop_layout: boolean;
 };
 
-export type Browser = { id: string; name: string };
+export type InstalledBrowser = {
+  id: string;
+  name: string;
+  kind: "native" | "flatpak";
+  executable: string;
+  launch_prefix: string[];
+  profiles_dir: string;
+};
 
 export type BrowserStatus = {
-  installed: Browser[];
-  supported: Browser[];
+  installed: InstalledBrowser[];
+  supported: string[];
 };
 
 export const getSettings = callable<[], Settings>("get_settings");
@@ -31,14 +38,3 @@ export const saveLink = callable<[link: WebLink], WebLink>("save_link");
 
 export const deleteLink = callable<[appId: string], WebLink | null>("delete_link");
 
-const fetchUserHome = callable<[], string>("get_user_home");
-
-let cachedUserHome: Promise<string> | null = null;
-
-export function getUserHome(): Promise<string> {
-  cachedUserHome ??= fetchUserHome().catch((error) => {
-    cachedUserHome = null;
-    throw error;
-  });
-  return cachedUserHome;
-}

@@ -6,9 +6,8 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
-    "dev:link": "bash dev/link.sh",
-    "dev:unlink": "bash dev/unlink.sh",
-    "dev:reload": "bash dev/reload.sh"
+    "dev:deploy": "bash dev/deploy.sh",
+    "dev:uninstall": "bash dev/uninstall.sh"
   },
   "license": "BSD-3-Clause",
   "devDependencies": {

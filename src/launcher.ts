@@ -1,14 +1,13 @@
-import { getBrowsers, getSettings, getUserHome, saveLink } from "./backend";
+import { getBrowsers, getSettings, saveLink, type InstalledBrowser } from "./backend";
 import * as steam from "./steam";
 import { displayName, type WebLink } from "./types";
-
-const FLATPAK_EXECUTABLE = "/usr/bin/flatpak";
-const PROFILES_FOLDER = "steamweblauncher";
 
 const SKIP_NEW_PROFILE_PROMPTS_FLAGS = ["--no-first-run", "--no-default-browser-check"];
 const FILL_GAMESCOPE_WINDOW_FLAG = "--start-fullscreen";
 
 export class NoBrowserError extends Error {}
+
+type ShortcutCommand = { executable: string; launchOptions: string };
 
 function quoteForSteamArgumentParser(value: string): string {
   return `"${value.replace(/["\\$`]/g, "\\$&")}"`;
@@ -18,14 +17,10 @@ function profileSlug(webLinkId: string): string {
   return webLinkId.replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
-function isolatedProfileDirectory(home: string, browserId: string, webLinkId: string): string {
-  return `${home}/.var/app/${browserId}/${PROFILES_FOLDER}/${profileSlug(webLinkId)}`;
-}
-
-async function firstInstalledBrowserId(): Promise<string> {
+async function preferredInstalledBrowser(): Promise<InstalledBrowser> {
   const { installed } = await getBrowsers();
   if (!installed.length) throw new NoBrowserError();
-  return installed[0].id;
+  return installed[0];
 }
 
 function roundToHundredths(value: number): number {
@@ -38,37 +33,41 @@ function matchGameModeScaleFlags(): string[] {
   return [`--force-device-scale-factor=${roundToHundredths(scale)}`];
 }
 
-async function buildLaunchOptions(link: WebLink): Promise<string> {
-  const [home, browserId] = await Promise.all([getUserHome(), firstInstalledBrowserId()]);
-  const profileDirectory = isolatedProfileDirectory(home, browserId, link.id);
-  return [
-    "run",
-    browserId,
+async function buildShortcutCommand(link: WebLink): Promise<ShortcutCommand> {
+  const browser = await preferredInstalledBrowser();
+  const profileDirectory = `${browser.profiles_dir}/${profileSlug(link.id)}`;
+  const launchOptions = [
+    ...browser.launch_prefix,
     `--app=${quoteForSteamArgumentParser(link.url)}`,
     `--user-data-dir=${quoteForSteamArgumentParser(profileDirectory)}`,
     ...SKIP_NEW_PROFILE_PROMPTS_FLAGS,
     FILL_GAMESCOPE_WINDOW_FLAG,
     ...matchGameModeScaleFlags(),
   ].join(" ");
+  return { executable: browser.executable, launchOptions };
 }
 
-async function existingOrNewShortcut(link: WebLink): Promise<number> {
+async function existingOrNewShortcut(link: WebLink, executable: string): Promise<number> {
   const existing = link.shortcut_app_id;
   if (existing !== null && steam.shortcutExists(existing)) return existing;
-  return steam.addUnnamedShortcut(FLATPAK_EXECUTABLE);
+  return steam.addUnnamedShortcut(executable);
 }
 
 async function updateShortcutWhereChanged(
   appId: number,
   link: WebLink,
-  launchOptions: string,
+  command: ShortcutCommand,
 ): Promise<void> {
   const name = displayName(link);
   if (steam.getShortcutName(appId) !== name) {
     steam.setShortcutName(appId, name);
   }
-  if ((await steam.getShortcutLaunchOptions(appId)) !== launchOptions) {
-    steam.setShortcutLaunchOptions(appId, launchOptions);
+  const current = await steam.getShortcutDetails(appId);
+  if (current?.executable !== command.executable) {
+    steam.setShortcutExecutable(appId, command.executable);
+  }
+  if (current?.launchOptions !== command.launchOptions) {
+    steam.setShortcutLaunchOptions(appId, command.launchOptions);
   }
   if (steam.isShortcutHidden(appId) !== link.hidden) {
     steam.setShortcutHidden(appId, link.hidden);
@@ -76,9 +75,9 @@ async function updateShortcutWhereChanged(
 }
 
 export async function prepareShortcut(link: WebLink): Promise<number> {
-  const launchOptions = await buildLaunchOptions(link);
-  const appId = await existingOrNewShortcut(link);
-  await updateShortcutWhereChanged(appId, link, launchOptions);
+  const command = await buildShortcutCommand(link);
+  const appId = await existingOrNewShortcut(link, command.executable);
+  await updateShortcutWhereChanged(appId, link, command);
   return appId;
 }
 

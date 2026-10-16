@@ -53,12 +53,16 @@ export function getShortcutName(appId: number): string | undefined {
   return window.appStore.GetAppOverviewByAppID(appId)?.display_name;
 }
 
-export function getShortcutLaunchOptions(
-  appId: number,
-): Promise<string | undefined> {
+export type ShortcutDetails = { executable: string; launchOptions: string };
+
+function withoutSurroundingQuotes(value: string): string {
+  return value.replace(/^"(.*)"$/, "$1");
+}
+
+export function getShortcutDetails(appId: number): Promise<ShortcutDetails | undefined> {
   return new Promise((resolve) => {
     let settled = false;
-    const finish = (value: string | undefined) => {
+    const finish = (value: ShortcutDetails | undefined) => {
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
@@ -67,13 +71,25 @@ export function getShortcutLaunchOptions(
     };
     const timeout = setTimeout(() => finish(undefined), APP_DETAILS_TIMEOUT_MS);
     const subscription = SteamClient.Apps.RegisterForAppDetails(appId, (details) =>
-      finish(details.strShortcutLaunchOptions),
+      finish({
+        executable: withoutSurroundingQuotes(details.strShortcutExe),
+        launchOptions: details.strShortcutLaunchOptions,
+      }),
     );
   });
 }
 
 export function setShortcutName(appId: number, name: string): void {
   SteamClient.Apps.SetShortcutName(appId, name);
+}
+
+export function setShortcutExecutable(appId: number, executable: string): void {
+  SteamClient.Apps.SetShortcutExe(appId, `"${executable}"`);
+  SteamClient.Apps.SetShortcutStartDir(appId, `"${parentDirectory(executable)}"`);
+}
+
+function parentDirectory(path: string): string {
+  return path.slice(0, path.lastIndexOf("/")) || "/";
 }
 
 export function setShortcutLaunchOptions(appId: number, options: string): void {

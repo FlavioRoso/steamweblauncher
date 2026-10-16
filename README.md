@@ -13,7 +13,7 @@ Each link you add becomes a non-Steam shortcut that opens the site in its own br
 - **Scale:** pages follow the Game Mode interface scale.
 - **Languages:** English and Portuguese (Brazil), following Steam's language.
 
-Tested on a ROG Xbox Ally X running Bazzite. It should work on any device with Steam's Game Mode and Decky Loader, including the Steam Deck.
+Tested on a ROG Xbox Ally X running Bazzite. It only relies on Steam's Game Mode, gamescope and Decky Loader, so it should work on SteamOS (Steam Deck), Bazzite, CachyOS, ChimeraOS, Nobara, PikaOS and other systems with a Game Mode session.
 
 ## Installation
 
@@ -21,36 +21,56 @@ Tested on a ROG Xbox Ally X running Bazzite. It should work on any device with S
 
 If you don't have it yet, follow the instructions at [decky.xyz](https://decky.xyz). Bazzite may already ship with Decky. If it doesn't, run `ujust setup-decky` in a terminal.
 
-### 2. A Chromium-based browser (Flatpak)
+### 2. A Chromium-based browser
 
-The plugin uses one of these browsers, installed as a **Flatpak**. If more than one is installed, it uses the first one in the list:
+The plugin uses one of these browsers, installed either as a regular system package (**native**) or as a **Flatpak**:
 
-| Browser | Flatpak ID |
-|---|---|
-| Google Chrome | `com.google.Chrome` |
-| Chromium | `org.chromium.Chromium` |
-| Brave | `com.brave.Browser` |
-| Microsoft Edge | `com.microsoft.Edge` |
-| Vivaldi | `com.vivaldi.Vivaldi` |
+| Browser | Native command | Flatpak ID |
+|---|---|---|
+| Google Chrome | `google-chrome-stable` | `com.google.Chrome` |
+| Chromium | `chromium` or `chromium-browser` | `org.chromium.Chromium` |
+| Brave | `brave-browser` | `com.brave.Browser` |
+| Microsoft Edge | `microsoft-edge-stable` | `com.microsoft.Edge` |
+| Vivaldi | `vivaldi-stable` | `com.vivaldi.Vivaldi` |
 
-Ways to install one:
+If more than one is installed, native browsers come first, then Flatpaks, each in the order of the table.
 
-- **Steam Deck, from Game Mode:** in the Library, **Non-Steam** tab, SteamOS offers to install Google Chrome.
-- **From the store, in Desktop Mode:** search for "Chrome" or "Chromium" in **Discover** (Steam Deck) or **Bazaar** (Bazzite).
-- **From a terminal:**
+How to install one depends on your system:
+
+- **SteamOS (Steam Deck):** in Game Mode, Library > **Non-Steam** tab, SteamOS offers to install Google Chrome. Or search for "Chrome" or "Chromium" in **Discover** in Desktop Mode.
+- **Bazzite, ChimeraOS and other image-based systems:** use a Flatpak, since the system image is read-only. From the store (**Bazaar** on Bazzite) or from a terminal:
   ```bash
-  flatpak install flathub com.google.Chrome
+  flatpak install --system flathub com.google.Chrome
   ```
-  On Bazzite, add `--system` (`flatpak install --system flathub com.google.Chrome`). Without it, `flatpak` asks where to install.
+- **CachyOS and other Arch-based systems:** `sudo pacman -S chromium`
+- **Nobara and other Fedora-based systems:** `sudo dnf install chromium`
+- **PikaOS and other Debian-based systems:** `sudo apt install chromium`
 
-To check: on the plugin's page in Decky, the **Browser** section shows which one was found.
+Any of the browsers in the table also works as a Flatpak on these systems, if Flatpak is set up.
+
+To check: on the plugin's page in Decky, the **Browser** section shows which one was found and whether it is native or Flatpak.
 
 ### 3. The plugin
+
+#### From a release
 
 1. Download the latest `steamweblauncher.zip` from the [Releases](../../releases) page.
 2. In Game Mode, open Decky (`...` button > plug icon) > **Settings** (gear) > **General** and turn on **Developer mode**.
 3. In **Settings > Developer**, use **Install Plugin from ZIP File** and pick the downloaded file. You can also paste the ZIP's link into **Install Plugin from URL**.
 4. The plugin shows up in Decky's list as **steamweblauncher**, and the **Web** tab appears in the Quick Access menu.
+
+#### From source
+
+Needs git, Node.js 22+, pnpm and Python 3 (on Bazzite: `brew install node pnpm`). In Desktop Mode or over SSH:
+
+```bash
+git clone <repository URL> steamweblauncher
+cd steamweblauncher
+pnpm install
+pnpm dev:deploy
+```
+
+`dev:deploy` asks for your password (sudo) to link the plugin into Decky and restart it. To update later, run `git pull` and `pnpm dev:deploy` again.
 
 ## Usage
 
@@ -72,11 +92,11 @@ On the plugin's page in Decky:
 
 ### Microphone and camera
 
-The Chrome and Chromium Flatpaks already have audio access through PipeWire. If the microphone or camera doesn't show up in Discord or Meet, check the browser's permissions with **Flatseal** (`com.github.tchx84.Flatseal`).
+Native browsers have direct access to the microphone and camera. The Chrome and Chromium Flatpaks already have audio access through PipeWire; if the microphone or camera doesn't show up in Discord or Meet, check the browser's permissions with **Flatseal** (`com.github.tchx84.Flatseal`).
 
 ## Known limitations
 
-- Only Chromium-based browsers installed as Flatpak are supported.
+- Only Chromium-based browsers are supported (native or Flatpak).
 - In Game Mode, gamescope treats the touchscreen as a mouse: dragging a finger selects and drags instead of scrolling the page.
 
 ## Where data is kept
@@ -84,37 +104,49 @@ The Chrome and Chromium Flatpaks already have audio access through PipeWire. If 
 | What | Where |
 |---|---|
 | Link list and settings | `~/homebrew/settings/steamweblauncher/` |
-| Logins and cache of each link | `~/.var/app/<browser id>/steamweblauncher/` |
+| Logins and cache of each link (native browser) | `~/.local/share/steamweblauncher/profiles/<browser command>/` |
+| Logins and cache of each link (Flatpak browser) | `~/.var/app/<flatpak id>/steamweblauncher/` |
 | Logs | `~/homebrew/logs/steamweblauncher/` |
 
 Uninstalling from Decky removes the controller templates. The folders above are kept and can be deleted by hand.
 
 ## Development
 
-Requirements: Node.js 22+ and pnpm (on Bazzite: `brew install node pnpm`).
+Uses the same requirements as [installing from source](#from-source).
 
 ```bash
 pnpm install
-pnpm build         # builds dist/index.js (pnpm watch rebuilds on every change)
-pnpm dev:link      # exposes the project to Decky through symlinks (asks for sudo)
-pnpm dev:reload    # build + reload this plugin only, no sudo
-pnpm dev:unlink    # removes the links; the project is not touched
+pnpm build          # builds dist/index.js (pnpm watch rebuilds on every change)
+pnpm dev:deploy     # build + install or reload the plugin in Decky
+pnpm dev:uninstall  # removes the plugin from Decky; the project is not touched
 ```
 
-- **`dev:link`:** Decky hands plugin folders over to root. So the script creates `~/homebrew/plugins/steamweblauncher/` with links to `main.py`, `package.json`, `dist/`, `py_modules/` and `defaults/`, plus a copy of `plugin.json`. Run it again after editing `plugin.json`.
-- **`dev:reload`:** needs **Allow Remote CEF Debugging** turned on in Decky's Settings > Developer.
+- **`dev:deploy`:** the first time, or after editing `plugin.json`, it creates `~/homebrew/plugins/steamweblauncher/` with links to `main.py`, `package.json`, `dist/`, `py_modules/` and `defaults/`, plus a copy of `plugin.json` (Decky hands plugin folders over to root), and restarts Decky (asks for sudo). After that, it only reloads this plugin, without sudo, when **Allow Remote CEF Debugging** is on in Decky's Settings > Developer; otherwise it restarts Decky.
 - **Backend outside Decky:** `python3 dev/run_backend.py <method> ['<JSON arg>' ...]` uses the `dev/decky.py` stub, with data in `dev/.sandbox/`.
-- **Logs:** `journalctl -u plugin_loader -f`. The frontend console is at `http://localhost:8080`, **SharedJSContext** tab.
+- **Logs:** the plugin log is in `~/homebrew/logs/steamweblauncher/`, and Decky's own log in `journalctl -u plugin_loader -f`. The frontend console is at `http://localhost:8080`, **SharedJSContext** tab (needs **Allow Remote CEF Debugging**).
 
 Conventions: code and logs in English, with no comments: names and small functions carry the intent. Interface text lives only in `src/i18n/locales/` (`en.ts` defines the keys, `pt-BR.ts` is typed from it, and the build fails if a translation is missing).
 
 ```
-main.py               backend (Plugin class called by the frontend)
-py_modules/steamweblauncher/  link list, settings, browsers, controller templates
-src/index.tsx         frontend entry point
-src/launcher.ts       creates/updates the non-Steam shortcut and opens the link
-src/steam.ts          wrappers for SteamClient's internal APIs
-src/views/            screens (list, form, settings)
-src/i18n/             translations
-dev/                  development scripts and tools
+plugin.json                    plugin identity for Decky (name, flags, store data)
+main.py                        backend entry point (Plugin class called by the frontend)
+py_modules/steamweblauncher/
+  links.py                     link list, stored in links.json
+  settings.py                  plugin settings, stored in settings.json
+  storage.py                   JSON read and atomic write
+  browsers.py                  native and Flatpak browser detection, profile folders
+  controller_templates.py      "SteamWeb Launcher – Desktop" controller templates
+src/
+  index.tsx                    frontend entry point
+  backend.ts                   typed calls to the backend
+  launcher.ts                  builds the non-Steam shortcut and opens the link
+  webLinks.ts                  create, edit, hide and delete links
+  steam.ts                     wrappers for SteamClient's internal APIs
+  quickAccessTab.tsx           Web tab in the Quick Access menu
+  views/, components/          screens (list, form, settings) and the link row
+  i18n/                        translations
+dev/
+  deploy.sh, uninstall.sh      install or remove the plugin in Decky
+  reload.mjs                   reloads the plugin through Steam's debugger
+  decky.py, run_backend.py     run backend methods outside Decky
 ```
