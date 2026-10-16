@@ -52,25 +52,24 @@ Para conferir: na página do plugin no Decky, a seção **Navegador** mostra qua
 
 ### 3. O plugin
 
-#### A partir de uma release
+O plugin ainda não está na loja do Decky, então a instalação é manual, a partir deste repositório. Faça isso no Modo Desktop (Konsole ou outro terminal) ou por SSH.
 
-1. Baixe o `steamweblauncher.zip` mais recente na página de [Releases](../../releases).
-2. No Game Mode, abra o Decky (botão `...` > ícone de tomada) > **Configurações** (engrenagem) > **Geral** e ative o **Modo desenvolvedor**.
-3. Em **Configurações > Desenvolvedor**, use **Instalar plugin a partir de ZIP** e escolha o arquivo baixado. Outra opção é colar o link do ZIP em **Instalar plugin a partir de URL**.
-4. O plugin aparece na lista do Decky como **steamweblauncher**, e a aba **Web** aparece no menu de acesso rápido.
+1. Instale as ferramentas de build: git, Node.js 22+, pnpm e Python 3. No Bazzite: `brew install node pnpm`.
+2. Pegue o código, clonando o repositório:
+   ```bash
+   git clone https://github.com/FlavioRoso/steamweblauncher.git
+   cd steamweblauncher
+   ```
+   ou baixando em **Code > Download ZIP** no GitHub, extraindo e abrindo um terminal na pasta extraída.
+3. Compile e instale no Decky:
+   ```bash
+   pnpm install
+   pnpm dev:deploy
+   ```
+   O `dev:deploy` pede sua senha (sudo) para linkar o plugin no Decky e reiniciá-lo.
+4. De volta ao Game Mode, o plugin aparece na lista do Decky como **steamweblauncher**, e a aba **Web** aparece no menu de acesso rápido.
 
-#### A partir do código-fonte
-
-Precisa de git, Node.js 22+, pnpm e Python 3 (no Bazzite: `brew install node pnpm`). No Modo Desktop ou por SSH:
-
-```bash
-git clone https://github.com/FlavioRoso/steamweblauncher.git
-cd steamweblauncher
-pnpm install
-pnpm dev:deploy
-```
-
-O `dev:deploy` pede sua senha (sudo) para linkar o plugin no Decky e reiniciá-lo. Para atualizar depois, rode `git pull` e `pnpm dev:deploy` de novo.
+O Decky carrega o plugin direto desta pasta, então não a mova nem apague. Para atualizar, rode `git pull` (ou baixe o ZIP de novo na mesma pasta) e depois `pnpm dev:deploy`. Para remover o plugin, rode `pnpm dev:uninstall`.
 
 ## Uso
 
@@ -112,7 +111,7 @@ Ao desinstalar pelo Decky, os templates de controle são removidos. As pastas ac
 
 ## Desenvolvimento
 
-Usa os mesmos requisitos da [instalação a partir do código-fonte](#a-partir-do-código-fonte).
+Usa os mesmos requisitos da [instalação do plugin](#3-o-plugin).
 
 ```bash
 pnpm install
