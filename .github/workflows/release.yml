@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check that the tag matches package.json
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+
+      - name: Build
+        run: pnpm build
+
+      - name: Package plugin
+        run: |
+          name="$(node -p 'require("./plugin.json").name')"
+          folder="out/$name"
+          mkdir -p "$folder"
+          cp main.py plugin.json package.json README.md README.pt-BR.md "$folder/"
+          rsync -a --exclude '*.map' dist "$folder/"
+          rsync -a --exclude __pycache__ py_modules "$folder/"
+          rsync -a --exclude .gitkeep defaults/ "$folder/"
+          if [ -f LICENSE ]; then cp LICENSE "$folder/"; fi
+          (cd out && zip -qr "$name.zip" "$name")
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" out/*.zip install.sh --title "$GITHUB_REF_NAME" --generate-notes

@@ -52,24 +52,20 @@ Para conferir: na página do plugin no Decky, a seção **Navegador** mostra qua
 
 ### 3. O plugin
 
-O plugin ainda não está na loja do Decky, então a instalação é manual, a partir deste repositório. Faça isso no Modo Desktop (Konsole ou outro terminal) ou por SSH.
+O plugin ainda não está na loja do Decky. Instale com um comando, no Modo Desktop (Konsole ou outro terminal) ou por SSH:
 
-1. Instale as ferramentas de build: git, Node.js 22+, pnpm e Python 3. No Bazzite: `brew install node pnpm`.
-2. Pegue o código, clonando o repositório:
-   ```bash
-   git clone https://github.com/FlavioRoso/steamweblauncher.git
-   cd steamweblauncher
-   ```
-   ou baixando em **Code > Download ZIP** no GitHub, extraindo e abrindo um terminal na pasta extraída.
-3. Compile e instale no Decky:
-   ```bash
-   pnpm install
-   pnpm dev:deploy
-   ```
-   O `dev:deploy` pede sua senha (sudo) para linkar o plugin no Decky e reiniciá-lo.
-4. De volta ao Game Mode, o plugin aparece na lista do Decky como **steamweblauncher**, e a aba **Web** aparece no menu de acesso rápido.
+```bash
+curl -fsSL https://github.com/FlavioRoso/steamweblauncher/releases/latest/download/install.sh | bash
+```
 
-O Decky carrega o plugin direto desta pasta, então não a mova nem apague. Para atualizar, rode `git pull` (ou baixe o ZIP de novo na mesma pasta) e depois `pnpm dev:deploy`. Para remover o plugin, rode `pnpm dev:uninstall`.
+Ele baixa a última versão, já compilada, para a pasta de plugins do Decky e reinicia o Decky. Pede sua senha (sudo) porque essa pasta pertence ao root. Não é preciso instalar mais nada além do Decky e do navegador.
+
+De volta ao Game Mode, o plugin aparece na lista do Decky como **steamweblauncher**, e a aba **Web** aparece no menu de acesso rápido.
+
+- **Atualizar:** rode o mesmo comando de novo.
+- **Uma versão específica:** `curl -fsSL https://github.com/FlavioRoso/steamweblauncher/releases/latest/download/install.sh | STEAMWEBLAUNCHER_VERSION=v0.1.0 bash`
+- **Sem terminal:** baixe o `steamweblauncher.zip` em [Releases](https://github.com/FlavioRoso/steamweblauncher/releases), ative o **Modo desenvolvedor** em **Configurações > Geral** do Decky e use **Configurações > Desenvolvedor > Instalar plugin a partir de ZIP**.
+- **Desinstalar:** em **Configurações > Plugins** do Decky, abra o menu ao lado de **steamweblauncher** e escolha **Desinstalar**.
 
 ## Uso
 
@@ -111,9 +107,11 @@ Ao desinstalar pelo Decky, os templates de controle são removidos. As pastas ac
 
 ## Desenvolvimento
 
-Usa os mesmos requisitos da [instalação do plugin](#3-o-plugin).
+Precisa de git, Node.js 22+, pnpm e Python 3 (no Bazzite: `brew install node pnpm`).
 
 ```bash
+git clone https://github.com/FlavioRoso/steamweblauncher.git
+cd steamweblauncher
 pnpm install
 pnpm build          # gera dist/index.js (pnpm watch recompila a cada mudança)
 pnpm dev:deploy     # build + instala ou recarrega o plugin no Decky
@@ -121,6 +119,8 @@ pnpm dev:uninstall  # remove o plugin do Decky; o projeto não é tocado
 ```
 
 - **`dev:deploy`:** na primeira vez, ou depois de editar o `plugin.json`, cria `~/homebrew/plugins/steamweblauncher/` com links para `main.py`, `package.json`, `dist/`, `py_modules/` e `defaults/`, mais uma cópia do `plugin.json` (o Decky passa as pastas dos plugins para o root), e reinicia o Decky (pede sudo). Depois disso, só recarrega este plugin, sem sudo, se o **Allow Remote CEF Debugging** estiver ativado em Configurações > Desenvolvedor do Decky; senão, reinicia o Decky.
+- **`dev:deploy` e uma release instalada:** o `dev:deploy` para se o plugin foi instalado pelo `install.sh` ou por ZIP. Desinstale pelo Decky antes.
+- **Releases:** aumente a `version` no `package.json`, faça o commit e envie uma tag com a mesma versão (`git tag v0.1.0 && git push origin v0.1.0`). O [workflow de release](.github/workflows/release.yml) compila o plugin e publica o `steamweblauncher.zip` e o `install.sh` como uma release no GitHub.
 - **Backend fora do Decky:** `python3 dev/run_backend.py <método> ['<arg JSON>' ...]` usa o stub `dev/decky.py`, com os dados em `dev/.sandbox/`.
 - **Logs:** o log do plugin fica em `~/homebrew/logs/steamweblauncher/`, e o do Decky em `journalctl -u plugin_loader -f`. O console do frontend fica em `http://localhost:8080`, aba **SharedJSContext** (precisa do **Allow Remote CEF Debugging**).
 
@@ -128,6 +128,8 @@ Convenções: código e logs em inglês, sem comentários: nomes e funções peq
 
 ```
 plugin.json                    identidade do plugin para o Decky (nome, flags, dados da loja)
+install.sh                     instalador de um comando, publicado com cada release
+.github/workflows/release.yml  compila e publica uma release para cada tag de versão
 main.py                        entrada do backend (classe Plugin chamada pelo frontend)
 py_modules/steamweblauncher/
   links.py                     lista de links, gravada em links.json

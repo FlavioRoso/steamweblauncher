@@ -31,5 +31,6 @@
         "react-dom"
       ]
     }
-  }
+  },
+  "packageManager": "pnpm@12.10.1"
 }
