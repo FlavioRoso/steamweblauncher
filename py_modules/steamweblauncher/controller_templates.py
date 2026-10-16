@@ -9,13 +9,23 @@ class TemplateSource(NamedTuple):
     controller_type: str
 
 
-HANDHELD_DESKTOP_LAYOUT = "desktop_xboxone.vdf"
+XBOX_DESKTOP_LAYOUT = "desktop_xboxone.vdf"
+PLAYSTATION_DESKTOP_LAYOUT = "desktop_ps4.vdf"
 
 TEMPLATES = {
-    "xboxone": TemplateSource("desktop_xboxone.vdf", "controller_xboxone"),
-    "ps4": TemplateSource("desktop_ps4.vdf", "controller_ps4"),
+    "xbox360": TemplateSource(XBOX_DESKTOP_LAYOUT, "controller_xbox360"),
+    "xboxone": TemplateSource(XBOX_DESKTOP_LAYOUT, "controller_xboxone"),
+    "xboxelite": TemplateSource(XBOX_DESKTOP_LAYOUT, "controller_xboxelite"),
+    "ps3": TemplateSource(PLAYSTATION_DESKTOP_LAYOUT, "controller_ps3"),
+    "ps4": TemplateSource(PLAYSTATION_DESKTOP_LAYOUT, "controller_ps4"),
+    "ps5": TemplateSource(PLAYSTATION_DESKTOP_LAYOUT, "controller_ps5"),
+    "ps5_edge": TemplateSource(PLAYSTATION_DESKTOP_LAYOUT, "controller_ps5_edge"),
     "neptune": TemplateSource("desktop_neptune.vdf", "controller_neptune"),
-    "switch_pro": TemplateSource(HANDHELD_DESKTOP_LAYOUT, "controller_switch_pro"),
+    "steamcontroller": TemplateSource(
+        "desktop_steamcontroller_gordon.vdf", "controller_steamcontroller_gordon"
+    ),
+    "switch_pro": TemplateSource(XBOX_DESKTOP_LAYOUT, "controller_switch_pro"),
+    "generic": TemplateSource(XBOX_DESKTOP_LAYOUT, "controller_generic"),
 }
 
 TEMPLATE_PREFIX = "steamweblauncher_desktop_"
